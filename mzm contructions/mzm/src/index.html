@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MZM Construction — Landing (2. fázis): Refined &amp; Bold Essential → Footer</title>
+<meta name="description" content="MZM Construction felújító oldal – moduláris landing, 2. fázis. Referencia elrendezés: kononenkogroup.com 'Refined & Bold Essential' szekciótól a footerig. GSAP + ScrollTrigger animációk, parallax, egyedi kurzor.">
+<style>
+/* ════════════════════════════════════════════════════════════════════
+   MZM CONSTRUCTION — LANDING VÁZ · 1. FÁZIS
+   Referencia: kononenkogroup.com — "Refined & Bold Essential" → Footer
+   ────────────────────────────────────────────────────────────────────
+   2. FÁZIS: GSAP + ScrollTrigger animációk (CDN / inline build),
+      fade-in-up reveal-ek, pin + scrub timeline-ek, enyhe parallax,
+      kurzor-követő dot+ring. NINCS 3D / Canvas / WebGL.
+      JS nélkül (illetve prefers-reduced-motion esetén) az oldal
+      teljesen statikusan, minden elem láthatóan működik.
+   • Skála-rendszer (mint az eredetinél): :root font-size vw-ben,
+     így 1rem = 1px 1920px-es nézőpontban (desktop) és 375px-en (mobil).
+   • Eredeti szövegtartalom 1:1 megtartva (későbbi MZM szövegcsere a
+     2. fázisban). Képek: AI placeholder (fehér–fekete, prémium
+     architektúra-stílus).
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ── Betűtípusok ─────────────────────────────────────────────────────
+   Eredeti: "PP Neue Montreal" (kommerciális) + "Hedvig Letters Serif".
+   Helyettesítés: Archivo (OFL, groteszk – Neue Montreal közeli) +
+   Hedvig Letters Serif (az eredeti, OFL – Google Fonts). */
+
+@font-face{
+  font-family:'Hedvig Letters Serif';
+  font-style:normal;font-weight:400;font-display:swap;
+  src:url('assets/fonts/hedviglettersserif.woff2') format('woff2');
+}
+@font-face{
+  font-family:'Archivo';
+  font-style:normal;font-weight:400;font-display:swap;
+  src:url('assets/fonts/archivo.woff2') format('woff2');
+}
+
+:root{
+  --serif:'Hedvig Letters Serif', Georgia, 'Times New Roman', serif;
+  --sans:'Archivo', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --c-ink:#000;
+  --c-paper:#fff;
+  --c-grey:#929292;
+  --c-bubble:#f8f8f8;
+  font-size:.0520833333vw;              /* 1rem = 1px @ 1920px */
+}
+@media (max-width:767.98px){
+  :root{ font-size:.2666666667vw; }     /* 1rem = 1px @ 375px  */
+}
+
+/* ── Reset / alapok ────────────────────────────────────────────────── */
+*,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
+html,body{ background:var(--c-paper); color:var(--c-ink); }
+body{
+  font-family:var(--sans);
+  font-size:16rem; font-weight:400;
+  letter-spacing:-.02em; line-height:1.2;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+img{ display:block; }
+ul{ list-style:none; }
+a{ color:inherit; text-decoration:none; }
+a:hover{ opacity:.55; }
+
+/* ── Tipográfiai skálák (az eredeti .fn-* osztályok) ───────────────── */
+.fn-h2{ font-family:var(--serif); font-size:175rem; font-weight:400; letter-spacing:-.03em; line-height:.7; }
+.fn-h3{ font-family:var(--serif); font-size:118rem; font-weight:400; letter-spacing:-.03em; line-height:.9;  }
+.fn-h4{ font-family:var(--serif); font-size:80rem;  font-weight:400; letter-spacing:-.03em; line-height:.8;  }
+.fn-b1{ font-family:var(--sans);  font-size:16rem;  font-weight:400; letter-spacing:-.02em; line-height:1.2; }
+.f-mn{ font-family:var(--sans); }
+.f-sf{ font-family:var(--serif); }
+.cl-gr3{ color:var(--c-grey); }
+@media (max-width:767.98px){
+  .fn-h2{ font-size:40rem; }
+  .fn-h3{ font-size:36rem; }
+  .fn-h4{ font-size:30rem; }
+  .fn-b1{ font-size:14rem; }
+  body{ font-size:14rem; }
+}
+
+/* ── Általános konténer ( az eredeti .ctr ) ────────────────────────── */
+.ctr{ display:block; padding:0 30rem; width:100%; }
+
+/* ════════════════════════════════════════════════════════════════════
+   1. SZEKCIÓ — "Refined & Bold Essential"  ( .nmc )
+   Eredetiben 200vh sticky pin + scroll crossfade a két cím között,
+   valamint forgó oktagon-vonal és számgörbe. 1. fázis: statikus képkocka.
+   ════════════════════════════════════════════════════════════════════ */
+.nmc{ height:200vh; position:relative; }
+.xhv{
+  height:100vh; left:0; position:sticky; top:0; width:100%;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+}
+.pmh{ position:relative; width:100%; }
+.pmh .eta{
+  left:50%; top:50%; position:absolute; transform:translate(-50%,-50%);
+  line-height:.875; text-align:center; width:max-content;
+}
+/* A második cím az eredetinél scrollra keresztezi az elsőt — 2. fázis.
+   Most rejtve, de a DOM-ban megtartva (1:1 szövegtartalom).
+   A GSAP a scrub-timeline-ben animálja be (2. fázis). */
+.pmh .eta.btb{ opacity:0; }
+
+/* Odometer sorgörgők: a slot egyetlen látható "ablak" (overflow:hidden,
+   saját perspektívával); a cellák abszolút egymás felett állnak.
+   JS nélkül a "b" cellák 90°-ra hajtva, élükre fordulva láthatatlanok. */
+.odo{ display:block; }
+.odo-slot{
+  position:relative; display:grid; justify-content:center;
+  height:.9em; overflow:hidden;
+  perspective:750px;
+}
+/* Grid-stack: mindkét cella ugyanabba a grid-cellébe esik → a slot
+   szélessége a SZÉLESEBB szöveg után alakul (abszolút pozicionálással
+   a max-content 0 lenne, és az overflow:hidden mindent levágna). */
+.odo-cell{
+  grid-area:1/1; display:block;
+  white-space:nowrap; line-height:.875;
+  backface-visibility:hidden; will-change:transform;
+}
+.odo-cell.a{ transform-origin:50% 0%; }        /* felső görgő: átbillent felül */
+.odo-cell.b{ transform-origin:50% 100%; }        /* alsó görgő: alulról gördül be
+   (kezdőállapot yPercent:115 + rotateX:-60 → a JS állítja be, lásd gsap.set) */
+/* 90°-on állva a lap élét a perspektíva vékony vonalként vetítené ki —
+   ezért JS mellett a flip ablakán kívül opacity:0 (a GSAP .set() scrub
+   mellett determinisztikusan toggle-el); no-JS esetén látszanak a régi sorok. */
+.js .odo-cell.b{ opacity:0; }
+/* no-JS: az új sorok teljesen ki vannak kapcsolva (csak a régi cím látszik) */
+html:not(.js) .odo-cell.b{ display:none; }
+
+/* Központi vizuál: oktagon vonalháló + 01–08 számok */
+.ctw{
+  height:80vh; width:80vh;
+  left:50%; top:50%; position:absolute; transform:translate(-50%,-50%);
+  pointer-events:none;
+}
+.ctw svg{ width:100%; height:100%; display:block; }
+.ctw svg .qqg{ opacity:.35; }
+.lhr{ --rot:0deg; position:absolute; inset:0; font-size:12rem; }
+.lhr span{
+  left:50%; top:50%; position:absolute;
+  transform:translate(-50%,-50%)
+            rotate(calc(var(--a) + var(--rot,0deg)))
+            translateY(calc(10rem - 42vh))
+            rotate(calc(-1*(var(--a) + var(--rot,0deg))));
+}
+
+@media (max-width:767.98px){
+  .nmc{ height:auto; }
+  .xhv{ position:relative; height:auto; min-height:420rem; padding:40rem 15rem; }
+  .pmh .eta{
+    left:auto; top:auto; position:relative; transform:none;
+    width:max-content; max-width:calc(100vw - 24rem); z-index:1;
+  }
+  .pmh .eta.btb{ display:none; }
+  .ctw{ width:270rem; height:270rem; }
+  .lhr{ font-size:9rem; }
+  .lhr span{
+    transform:translate(-50%,-50%)
+              rotate(calc(var(--a) + var(--rot,0deg)))
+              translateY(-118rem)
+              rotate(calc(-1*(var(--a) + var(--rot,0deg))));
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   2. SZEKCIÓ — "People & Process"  ( .nwv )
+   ─ kis serif címke felül-balra, nagy h3 behúzással
+   ─ fotógyűrű a "2011 Year of Foundation" cím körül
+     (eredetiben scroll-vezérelt orbit — most statikus elrendezés)
+   ─ statisztika-lista jobbra (eredetiben scrollra "gyulladnak" a sorok)
+   ════════════════════════════════════════════════════════════════════ */
+.nwv{
+  background:var(--c-ink); color:var(--c-paper);
+  overflow:hidden; position:relative;
+  padding:256rem 0;
+}
+.enr{ max-width:1130rem; position:relative; width:100%; }
+.enr .amv{ left:0; top:6rem; position:absolute; max-width:105rem; width:100%; }
+.enr .kca{ text-indent:125rem; }
+
+.uwg{
+  align-items:center; display:flex; flex-direction:column; justify-content:center;
+  /* Eredeti: margin:1200rem auto — ez a scroll-"runway" az orbit animációhoz.
+     1. fázis (animáció nélkül) egy tömörebb, 260rem-es ritmus. */
+  margin:260rem auto; text-align:center;
+}
+.uwg .vrc{ position:relative; width:100%; height:1200rem; }
+.vnj{ --rr:600rem; --sz:300rem; position:absolute; left:50%; top:50%; width:0; height:0; will-change:transform; }
+.vnj .elr{
+  left:50%; top:50%; position:absolute;
+  width:var(--sz); height:var(--sz); overflow:hidden;
+  transform:translate(-50%,-50%)
+            rotate(var(--a))
+            translateY(calc(-1 * var(--rr)))
+            rotate(calc(-1 * var(--a)));
+}
+.vnj .elr img{ width:100%; height:100%; object-fit:cover; filter:grayscale(1); }
+.uwg .vrc .kca{
+  left:50%; top:50%; position:absolute; transform:translate(-50%,-50%);
+  z-index:1; line-height:.85; max-width:1240rem; width:100%; margin:0 auto; text-align:center;
+}
+.uwg .ciz{ display:flex; gap:80rem; justify-content:center; margin-top:70rem; }
+.uwg .ciz .iek{ opacity:.5; text-align:center; width:356rem; }
+
+.ima .ppi{
+  display:flex; flex-direction:column;
+  margin-left:auto; max-width:857rem; width:100%;
+}
+.ima .ppi .ohb{
+  display:flex; flex-direction:column; gap:30rem;
+  padding-bottom:150rem;
+}
+/* inaktív/aktív állapot — 2. fázis: ScrollTrigger toggleClass vezérli;
+   JS nélkül (illetve reduced-motion esetén) a sorok teljesen látszódnak */
+.js .ima .ppi .ohb{ opacity:.2; transition:opacity .5s ease; }
+.js .ima .ppi .ohb.is-active{ opacity:1; }
+.js .ima .ppi .ohb:hover{ opacity:1; }
+.ima .ppi .ohb .kca{ opacity:.8; text-indent:130rem; }
+.ima .ppi .ohb:last-child{ padding-bottom:0; }
+
+@media (max-width:767.98px){
+  .nwv{ padding:60rem 0; }
+  .enr .amv{ position:static; margin-bottom:8rem; max-width:none; }
+  .enr .kca{ text-indent:0; }
+  .uwg{ margin:80rem auto; }
+  .uwg .vrc{
+    display:flex; align-items:center; justify-content:center;
+    width:345rem; height:345rem; margin:0 auto;
+  }
+  .vnj{ --rr:118rem; --sz:66rem; }
+  .uwg .vrc .kca{ position:relative; left:auto; top:auto; transform:none; }
+  .uwg .ciz{ flex-direction:column; gap:24rem; margin-top:40rem; }
+  .uwg .ciz .iek{ width:100%; }
+  .ima .ppi{ margin-left:0; max-width:none; }
+  .ima .ppi .ohb{ gap:15rem; max-width:250rem; opacity:1; padding-bottom:48rem; }
+  .ima .ppi .ohb .kca{ text-indent:40rem; }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   3. SZEKCIÓ — "The World's Most Ambitious Brands…"  ( .uod )
+   Középen óriás cím, körülötte partner-logó kör (origineben scroll-animált
+   orbit; képek helyett most generált placeholder logók).
+   ════════════════════════════════════════════════════════════════════ */
+.uod{
+  background:var(--c-ink); color:var(--c-paper);
+  display:flex; justify-content:center; position:relative;
+  padding:90rem 0 256rem;
+}
+.oys{ display:contents; }
+.ucu{
+  display:block; line-height:.8166666667;
+  margin-top:auto; margin-bottom:auto;
+  max-width:1107rem; width:100%;
+  position:relative; text-align:center; z-index:2;
+}
+.mam{ inset:0; position:absolute; z-index:1; }
+.mam .xuc{
+  left:50%; top:50%; position:absolute;
+  width:var(--s); height:var(--s);
+  background:var(--bg,#f8f8f8); color:var(--fg,#000); border-radius:50%;
+  transform:translate(-50%,-50%) translate(var(--x), var(--y));
+}
+.mam .xuc::before{
+  content:""; position:absolute; inset:0; border-radius:50%;
+  box-shadow:0 0 1.5vw #0006; pointer-events:none;
+}
+.mam .xuc svg{ position:absolute; inset:0; width:100%; height:100%; }
+
+@media (max-width:767.98px){
+  .uod{ flex-direction:column; padding:100rem 15rem; }
+  .oys{ display:flex; align-items:center; justify-content:center; margin:0 auto; position:relative; text-align:center; }
+  .ucu{ position:relative; z-index:1; }
+  .mam{ display:none; }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   FOOTER  ( .anj.avd )
+   15 osztados rács: logó | Navigation | Media | Address | Hours,
+   alatta óriás "KNKO" SVG logó + jogi/credita sorok.
+   ════════════════════════════════════════════════════════════════════ */
+.anj{ padding:160rem 0 12rem; width:100%; }
+.anj.avd{ background:var(--c-ink); color:var(--c-paper); }
+
+.anj .vxs{ display:grid; grid-template-columns:repeat(15,1fr); gap:20rem; width:100%; }
+.anj .vxs .skz{ grid-column:1/3; overflow:hidden; }
+.anj .vxs .skz .okf{ display:block; }
+.anj .vxs .skz .okf .idk{ font-size:19rem; line-height:1; }
+.anj .vxs .skz .okf .idk span{ display:block; }
+.anj .vxs .rbk{ font-family:var(--serif); }
+.anj .vxs .rbk.vdt{ grid-column:4/5; }
+.anj .vxs .rbk.job{ grid-column:8/9; }
+.anj .vxs .rbk.xbj{ grid-column:11/12; }
+.anj .vxs .rbk.rbv{ grid-column:14/15; }
+.anj .vxs .hak{ display:flex; flex-direction:column; }
+.anj .vxs .hak .cfs{ margin-top:20rem; }
+.anj .vxs .hak.rci{ grid-column:5/6; }
+.anj .vxs .hak.tap{ grid-column:9/10; }
+.anj .vxs .hak.jli{ grid-column:12/14; max-width:170rem; width:100%; }
+.anj .vxs .hak.spz{ grid-column:15/16; }
+
+.anj .nom{
+  color:var(--c-grey); font-family:var(--serif);
+  display:grid; grid-template-columns:repeat(15,1fr); gap:20rem; width:100%;
+  margin-top:300rem;
+}
+.anj .nom .amn{ grid-column:1/-1; width:100%; height:auto; display:block; }
+.anj .nom .qqa{ grid-column:1/3; }
+.anj .nom .vit{ display:flex; gap:20rem; grid-column:4/8; }
+.anj .nom .drq{ display:flex; gap:30rem; }
+.anj .nom .drq.sio{ grid-column:8/11; }
+.anj .nom .drq.lpl{ grid-column:11/14; }
+.anj .nom .mip{ display:flex; grid-column:14/16; justify-content:space-between; }
+
+@media (max-width:767.98px){
+  .anj{ padding:100rem 0 50rem; }
+  .ctr{ padding:0 15rem; }
+  .anj .vxs{ display:grid; grid-template-columns:1fr 1fr; gap:10rem 15rem; }
+  .anj .vxs .skz{ grid-column:1/-1; grid-row:1; margin-bottom:24rem; }
+  .anj .vxs .skz .okf .idk{ font-size:14rem; }
+  .anj .vxs .rbk.vdt{ grid-column:1; grid-row:2; }
+  .anj .vxs .rbk.job{ grid-column:2; grid-row:2; }
+  .anj .vxs .hak.rci{ grid-column:1; grid-row:3; }
+  .anj .vxs .hak.tap{ grid-column:2; grid-row:3; }
+  .anj .vxs .rbk.xbj{ grid-column:1; grid-row:4; margin-top:24rem; }
+  .anj .vxs .rbk.rbv{ grid-column:2; grid-row:4; margin-top:24rem; }
+  .anj .vxs .hak.jli{ grid-column:1; grid-row:5; max-width:none; }
+  .anj .vxs .hak.spz{ grid-column:2; grid-row:5; }
+  .anj .nom{ display:flex; flex-direction:column; gap:16rem; margin-top:64rem; }
+  .anj .nom .vit{ flex-wrap:wrap; gap:8rem; }
+}
+
+
+/* ── 2b. GALÉRIA — ABSZOLÚT pozicionált, független kártyák ───────────
+   Nincs flexbox / sora-wrapper: minden kártya önállóan, saját
+   kezdőpozícióból (--l / --t) indul, és a GSAP egyedi X-útvonalon +
+   közös íves Y-PÁLYÁN (bal +200 / közép +400 / jobb −150) halad át.
+   overflow-x:clip → vízszintesen nem csúszik ki az oldal (nincs
+   vízszintes scrollbar), overflow-y:visible → a kártyák FÜGGŐLEGES
+   mozgásterét SEMMI nem korlátozza (felső rész nem vágódhat le). */
+.pinwrap{ position:relative; }   /* címsor + galéria közös wrapperje (NINCS pin) */
+.gal{
+  height:100vh; width:100%;
+  position:relative;
+  overflow-x:clip; overflow-y:visible;
+  margin-top:2rem;
+}
+.gal-item{
+  position:absolute;
+  left:var(--l); top:var(--t);
+  width:var(--gw); height:var(--gh);
+  transform-origin:center center;
+  transform:rotate(var(--gr)) translateY(var(--gy,0rem)); /* no-JS tartalék */
+}
+.gal-in{
+  width:100%; height:100%; overflow:hidden; background:#111;
+  transition:transform .8s cubic-bezier(.22,1,.36,1);
+  will-change:transform;
+}
+.gal-item:hover .gal-in{ transform:scale(1.06); }
+.gal-in img{ width:100%; height:100%; object-fit:cover; filter:grayscale(1); display:block; }
+@media (max-width:767.98px){
+  .gal{ height:70vh; margin-top:2rem; }
+  .gal-item{ width:calc(var(--gw)*.55); height:calc(var(--gh)*.55);
+             --l:calc(var(--li)*64vw); }   /* szélesebb lépés mobilon → átfedésmentes */
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   2. FÁZIS — HOVER / INTERAKTÍV EFFEKTEK + EGYEDI KURZOR
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ── Linkek: lágy, lekerekített átmenet + aláhúzás-sweep ───────────── */
+a{ transition:opacity .35s ease; }
+.link{ position:relative; }
+.link::after{
+  content:""; position:absolute; left:0; bottom:-.18em;
+  width:100%; height:1px; background:currentColor;
+  transform:scaleX(0); transform-origin:right center;
+  transition:transform .5s cubic-bezier(.22,1,.36,1);
+}
+.link:hover::after{ transform:scaleX(1); transform-origin:left center; }
+
+/* ── Fotógyűrű képeinek hover-skálája (a .elr-in wrapperen) ────────── */
+.elr-in{
+  width:100%; height:100%; overflow:hidden;
+  transition:transform .8s cubic-bezier(.22,1,.36,1);
+  will-change:transform;
+}
+.elr:hover .elr-in{ transform:scale(1.07); }
+
+/* ── Partner-buborékok hoverje (a belső SVG-n → nem ütközik a GSAP-pal) */
+.xuc svg{ transition:transform .6s cubic-bezier(.22,1,.36,1); }
+.xuc:hover svg{ transform:scale(1.1) rotate(4deg); }
+
+/* ── Footer óriás logó hover ───────────────────────────────────────── */
+.amn{ overflow:hidden; transition:opacity .4s ease; }
+.amn:hover{ opacity:.75; }
+
+/* ── Egyedi kurzor: pont + lemaradó kör (difference blend, mint az eredeti) */
+.cursor-dot,.cursor-ring{
+  position:fixed; top:0; left:0; z-index:10001;
+  pointer-events:none; border-radius:50%;
+  mix-blend-mode:difference; opacity:0;
+}
+.cursor-dot{ width:7rem; height:7rem; background:#fff; }
+.cursor-ring{ width:34rem; height:34rem; border:1px solid #fff; }
+.has-cursor,.has-cursor a,.has-cursor button{ cursor:none; }
+
+/* ── Akadálymentesség: reduced-motion → nincs kurzor/animáció ──────── */
+@media (prefers-reduced-motion: reduce){
+  .cursor-dot,.cursor-ring{ display:none; }
+}
+</style>
+</head>
+<body>
+
+<!-- 2. fázis · egyedi kurzor (dot + lemaradó kör) -->
+<div class="cursor-dot" aria-hidden="true"></div>
+<div class="cursor-ring" aria-hidden="true"></div>
+
+<main>
+
+  <!-- ════════════════════════════════════════════════════════════════
+       Itt zárul a "Selected projects" szekció — innentől a váz (1. fázis)
+       ════════════════════════════════════════════════════════════════ -->
+
+  <!-- ── 1. SZEKCIÓ · Refined & Bold Essential ─────────────────────── -->
+  <section class="nmc">
+    <div class="xhv">
+      <div class="pmh">
+        <!-- Odometer ("vízóra") cím: két külön görgő (1. és 2. sor).
+             Mindkét görgőben a régi (a) és az új (b) sor egymás mögött áll;
+             scrub-elve a görgők átfordulnak az új párra (3D rotateX roll). -->
+        <h2 class="fn-h4 eta lha f-mn" aria-label="Refined &amp; Bold Essential">
+          <span class="odo" aria-hidden="true">
+            <span class="odo-slot"><span class="odo-cell a">Refined &amp; Bold</span><span class="odo-cell b">Simplicity &amp; Clarity</span></span>
+            <span class="odo-slot"><span class="odo-cell a">Essential</span><span class="odo-cell b">of Approach</span></span>
+          </span>
+        </h2>
+        <!-- 1:1 szövegtartalom megőrizve (no-JS / mobil fallback, SEO) -->
+        <h2 class="fn-h4 eta btb f-mn" aria-hidden="true">Simplicity &amp; Clarity of Approach</h2>
+      </div>
+      <div class="ctw">
+        <div class="lhr" aria-hidden="true">
+          <span style="--a:323deg">01</span>
+          <span style="--a:8deg">02</span>
+          <span style="--a:53deg">03</span>
+          <span style="--a:98deg">04</span>
+          <span style="--a:143deg">05</span>
+          <span style="--a:188deg">06</span>
+          <span style="--a:233deg">07</span>
+          <span style="--a:278deg">08</span>
+        </div>
+        <svg width="913" height="913" viewBox="0 0 913 913" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <radialGradient id="vision-fade-gradient" cx="456.5" cy="456.5" r="456.5" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="white" stop-opacity="0"/>
+              <stop offset="0.16" stop-color="white" stop-opacity="0"/>
+              <stop offset="1" stop-color="white" stop-opacity="1"/>
+            </radialGradient>
+            <mask id="vision-fade" maskUnits="userSpaceOnUse" x="0" y="0" width="913" height="913">
+              <rect x="0" y="0" width="913" height="913" fill="url(#vision-fade-gradient)"/>
+            </mask>
+          </defs>
+          <g class="qqg" mask="url(#vision-fade)" opacity="0.5">
+            <path class="spoke" stroke="currentColor" stroke-width="0.941598" fill="none" d="M470.42 357.47 C485.63 249.20, 500.85 140.93, 516.07 32.67"/>
+            <path class="spoke" stroke="currentColor" stroke-width="0.941598" fill="none" d="M536.36 396.32 C623.68 330.52, 711.00 264.72, 798.32 198.92"/>
+            <path class="spoke" stroke="currentColor" stroke-width="0.941598" fill="none" d="M555.53 470.42 C663.80 485.63, 772.07 500.85, 880.33 516.07"/>
+            <path class="spoke" stroke="currentColor" stroke-width="0.941598" fill="none" d="M516.68 536.36 C582.48 623.68, 648.28 711.00, 714.08 798.32"/>
+            <path class="spoke" stroke="currentColor" stroke-width="0.941598" fill="none" d="M442.58 555.53 C427.37 663.80, 412.15 772.07, 396.93 880.33"/>
+            <path class="spoke" stroke="currentColor" stroke-width="0.941598" fill="none" d="M376.64 516.68 C289.32 582.48, 202.00 648.28, 114.68 714.08"/>
+            <path class="spoke" stroke="currentColor" stroke-width="0.941598" fill="none" d="M357.47 442.58 C249.20 427.37, 140.93 412.15, 32.67 396.93"/>
+            <path class="spoke" stroke="currentColor" stroke-width="0.941598" fill="none" d="M396.32 376.64 C330.52 289.32, 264.72 202.00, 198.92 114.68"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 2. SZEKCIÓ · People & Process ─────────────────────────────── -->
+  <section class="nwv">
+    <div class="ctr">
+      <!-- A címsor + galéria KÖZÖS pin-eleme: a pin a wrapper TETEJÉhez
+           igazodik (start: "top top"), így a "A studio shaped by…" cím
+           VÉGIG látható marad a képernyő felső részén a fotósáv alatt. -->
+      <div class="pinwrap">
+      <div class="enr">
+        <h2 class="fn-b1 amv f-sf" data-reveal>People &amp; Process</h2>
+        <h3 class="fn-h3 kca" data-reveal="0.08">A studio shaped by clarity, trust, and a collective pursuit of thoughtful design.</h3>
+      </div>
+
+      <!-- 2b. Galéria — szabad görgetésű fotóformáció (vonal → kör/nap, scrub-elt morf) -->
+      <div class="gal" aria-label="Studio life gallery">
+          <figure class="gal-item" style="--gw:300rem;--gh:420rem;--gr:-2deg;--gy:-13rem;--li:0;--l:calc(var(--li)*22vw);--t:30%"><div class="gal-in"><img src="assets/img/gal1.jpg" alt="Studio life 1"></div></figure>
+          <figure class="gal-item" style="--gw:380rem;--gh:460rem;--gr:-3deg;--gy:-13rem;--li:1;--l:calc(var(--li)*22vw);--t:30%"><div class="gal-in"><img src="assets/img/people6.jpg" alt="Studio life 2"></div></figure>
+          <figure class="gal-item" style="--gw:320rem;--gh:400rem;--gr:-3deg;--gy:-17rem;--li:2;--l:calc(var(--li)*22vw);--t:30%"><div class="gal-in"><img src="assets/img/gal3.jpg" alt="Studio life 3"></div></figure>
+          <figure class="gal-item" style="--gw:340rem;--gh:440rem;--gr:-4deg;--gy:-24rem;--li:3;--l:calc(var(--li)*22vw);--t:30%"><div class="gal-in"><img src="assets/img/people2.jpg" alt="Studio life 4"></div></figure>
+          <figure class="gal-item" style="--gw:280rem;--gh:380rem;--gr:-4deg;--gy:-34rem;--li:4;--l:calc(var(--li)*22vw);--t:30%"><div class="gal-in"><img src="assets/img/gal2.jpg" alt="Studio life 5"></div></figure>
+          <figure class="gal-item" style="--gw:380rem;--gh:460rem;--gr:-5deg;--gy:-47rem;--li:5;--l:calc(var(--li)*22vw);--t:30%"><div class="gal-in"><img src="assets/img/gal4.jpg" alt="Studio life 6"></div></figure>
+          <figure class="gal-item" style="--gw:320rem;--gh:420rem;--gr:-6deg;--gy:-63rem;--li:6;--l:calc(var(--li)*22vw);--t:30%"><div class="gal-in"><img src="assets/img/people5.jpg" alt="Studio life 7"></div></figure>
+          <figure class="gal-item" style="--gw:300rem;--gh:400rem;--gr:-7deg;--gy:-80rem;--li:7;--l:calc(var(--li)*22vw);--t:30%"><div class="gal-in"><img src="assets/img/gal5.jpg" alt="Studio life 8"></div></figure>
+          <figure class="gal-item" style="--gw:360rem;--gh:440rem;--gr:-8deg;--gy:-98rem;--li:8;--l:calc(var(--li)*22vw);--t:30%"><div class="gal-in"><img src="assets/img/people9.jpg" alt="Studio life 9"></div></figure>
+          <figure class="gal-item" style="--gw:300rem;--gh:400rem;--gr:-9deg;--gy:-116rem;--li:9;--l:calc(var(--li)*22vw);--t:30%"><div class="gal-in"><img src="assets/img/gal6.jpg" alt="Studio life 10"></div></figure>
+      </div>
+      </div><!-- /.pinwrap -->
+
+      <div class="uwg">
+        <div class="vrc">
+          <div class="vnj">
+            <div class="elr" role="img" aria-label="Team portrait 1" style="--a:0deg"><div class="elr-in"><img src="assets/img/people1.jpg" alt=""></div></div>
+            <div class="elr" role="img" aria-label="Team portrait 2" style="--a:40deg"><div class="elr-in"><img src="assets/img/people2.jpg" alt=""></div></div>
+            <div class="elr" role="img" aria-label="Team portrait 3" style="--a:80deg"><div class="elr-in"><img src="assets/img/people3.jpg" alt=""></div></div>
+            <div class="elr" role="img" aria-label="Team portrait 4" style="--a:120deg"><div class="elr-in"><img src="assets/img/people4.jpg" alt=""></div></div>
+            <div class="elr" role="img" aria-label="Team portrait 5" style="--a:160deg"><div class="elr-in"><img src="assets/img/people5.jpg" alt=""></div></div>
+            <div class="elr" role="img" aria-label="Team portrait 6" style="--a:200deg"><div class="elr-in"><img src="assets/img/people6.jpg" alt=""></div></div>
+            <div class="elr" role="img" aria-label="Team portrait 7" style="--a:240deg"><div class="elr-in"><img src="assets/img/people7.jpg" alt=""></div></div>
+            <div class="elr" role="img" aria-label="Team portrait 8" style="--a:280deg"><div class="elr-in"><img src="assets/img/people8.jpg" alt=""></div></div>
+            <div class="elr" role="img" aria-label="Team portrait 9" style="--a:320deg"><div class="elr-in"><img src="assets/img/people9.jpg" alt=""></div></div>
+          </div>
+          <h2 class="fn-h2 kca f-mn" data-reveal>2011 Year<br> of Foundation</h2>
+        </div>
+        <div class="ciz">
+          <p class="iek tpv">Design approach grounded in passive strategies, material logic, and environmental responsibility.</p>
+          <p class="iek nyp">Lifecycle-focused architecture with efficient systems, sustainable choices, and long-term value.</p>
+        </div>
+      </div>
+
+      <div class="ima">
+        <div class="ppi">
+          <div class="ohb"><!-- 2. fázis: a ScrollTrigger toggleClass aktiválja -->
+            <h3 class="fn-h2 pqf f-mn">15+</h3>
+            <h3 class="fn-h3 kca">Years of experience</h3>
+          </div>
+          <div class="ohb">
+            <h3 class="fn-h2 pqf f-mn">490+</h3>
+            <h3 class="fn-h3 kca">Completed projects</h3>
+          </div>
+          <div class="ohb">
+            <h3 class="fn-h2 pqf f-mn">45+</h3>
+            <h3 class="fn-h3 kca">Professionals on the team</h3>
+          </div>
+          <div class="ohb">
+            <h3 class="fn-h2 pqf f-mn">40K</h3>
+            <h3 class="fn-h3 kca">Total area covered</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 3. SZEKCIÓ · The World's Most Ambitious Brands ────────────── -->
+  <section class="uod">
+    <div class="oys">
+      <h2 class="fn-h2 ucu"> The <br> World’s Most Ambitious Brands Choose to Work With Us</h2>
+      <div class="mam" aria-label="Partner logos">
+        <div class="xuc" role="img" aria-label="Partner: Bauwerk" style="--x:-300rem;--y:360rem;--s:170rem">
+          <svg viewBox="0 0 170 170" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="currentColor" stroke-width="3"><rect x="57" y="36" width="56" height="56"/><path d="M57 36 L113 92"/></g><text x="85" y="126" text-anchor="middle" font-family="Archivo, sans-serif" font-size="11" letter-spacing="2.5" fill="currentColor">BAUWERK</text></svg>
+        </div>
+        <div class="xuc" role="img" aria-label="Partner: Nordhaus" style="--x:-40rem;--y:400rem;--s:120rem">
+          <svg viewBox="0 0 170 170" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="currentColor" stroke-width="3"><path d="M55 84 L85 48 L115 84"/><path d="M62 84 V106 H108 V84"/></g><text x="85" y="128" text-anchor="middle" font-family="Archivo, sans-serif" font-size="11" letter-spacing="2.5" fill="currentColor">NORDHAUS</text></svg>
+        </div>
+        <div class="xuc" role="img" aria-label="Partner: Monolit" style="--x:250rem;--y:330rem;--s:105rem">
+          <svg viewBox="0 0 170 170" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="currentColor" stroke-width="3"><circle cx="85" cy="70" r="30"/></g><path d="M85 40 A30 30 0 0 1 85 100 Z" fill="currentColor"/><text x="85" y="128" text-anchor="middle" font-family="Archivo, sans-serif" font-size="11" letter-spacing="2.5" fill="currentColor">MONOLIT</text></svg>
+        </div>
+        <div class="xuc" role="img" aria-label="Partner: Forma" style="--x:-580rem;--y:200rem;--s:110rem">
+          <svg viewBox="0 0 170 170" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="currentColor" stroke-width="3"><rect x="55" y="40" width="44" height="44"/><rect x="71" y="56" width="44" height="44"/></g><text x="85" y="128" text-anchor="middle" font-family="Archivo, sans-serif" font-size="11" letter-spacing="2.5" fill="currentColor">FORMA</text></svg>
+        </div>
+        <div class="xuc" role="img" aria-label="Partner: Strukt" style="--x:-640rem;--y:-190rem;--s:150rem;background:#2f2f2f;--fg:#e8e8e8">
+          <svg viewBox="0 0 170 170" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="currentColor" stroke-width="3"><path d="M65 44 V96"/><path d="M85 44 V96"/><path d="M105 44 V96"/></g><text x="85" y="126" text-anchor="middle" font-family="Archivo, sans-serif" font-size="11" letter-spacing="2.5" fill="currentColor">STRUKT</text></svg>
+        </div>
+        <div class="xuc" role="img" aria-label="Partner: Terra" style="--x:-720rem;--y:20rem;--s:100rem">
+          <svg viewBox="0 0 170 170" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="currentColor" stroke-width="3"><path d="M59 78 A26 26 0 0 1 111 78"/><path d="M50 94 H120"/></g><text x="85" y="126" text-anchor="middle" font-family="Archivo, sans-serif" font-size="11" letter-spacing="2.5" fill="currentColor">TERRA</text></svg>
+        </div>
+        <div class="xuc" role="img" aria-label="Partner: Kubus" style="--x:610rem;--y:170rem;--s:130rem;background:#4a4a4a;--fg:#f0f0f0">
+          <svg viewBox="0 0 170 170" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="currentColor" stroke-width="3"><path d="M85 42 L113 58 V90 L85 106 L57 90 V58 Z"/><path d="M85 42 V74"/><path d="M57 58 L85 74 L113 58"/></g><text x="85" y="128" text-anchor="middle" font-family="Archivo, sans-serif" font-size="11" letter-spacing="2.5" fill="currentColor">KUBUS</text></svg>
+        </div>
+        <div class="xuc" role="img" aria-label="Partner: Habitat" style="--x:700rem;--y:-80rem;--s:95rem">
+          <svg viewBox="0 0 170 170" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="currentColor" stroke-width="3"><path d="M60 94 V62 L85 44 L110 62 V94 Z"/></g><text x="85" y="126" text-anchor="middle" font-family="Archivo, sans-serif" font-size="11" letter-spacing="2.5" fill="currentColor">HABITAT</text></svg>
+        </div>
+        <div class="xuc" role="img" aria-label="Partner: Geometria" style="--x:520rem;--y:-300rem;--s:140rem">
+          <svg viewBox="0 0 170 170" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="currentColor" stroke-width="3"><path d="M85 42 L110 56 V84 L85 98 L60 84 V56 Z"/></g><text x="85" y="126" text-anchor="middle" font-family="Archivo, sans-serif" font-size="10.5" letter-spacing="2" fill="currentColor">GEOMETRIA</text></svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ────────────────────────────────────────────────────── -->
+  <footer class="anj avd">
+    <div class="ctr">
+
+      <div class="vxs grd">
+        <div class="skz" data-reveal>
+          <a aria-current="page" href="/" class="okf">
+            <h1 class="fn-b1 idk">
+              <span>Kononenko</span>
+              <span>Architectural</span>
+              <span class="f-sf">Bureau</span>
+            </h1>
+          </a>
+        </div>
+
+        <p class="rbk vdt" data-reveal>Navigation</p>
+        <ul class="hak rci" data-reveal="0.06">
+          <li><a aria-current="page" href="/" class="link">Index</a></li>
+          <li><a href="/about" class="link">About</a></li>
+          <li><a href="/work" class="link">Work</a></li>
+          <li><a href="/about#team" class="link">Team</a></li>
+          <li class="cfs"><a href="/contact" class="link">Contact</a></li>
+          <li><a href="tel:+74957443563" rel="noopener noreferrer" class="link">Order desgin</a></li>
+        </ul>
+
+        <p class="rbk job" data-reveal="0.05">Media</p>
+        <ul class="hak tap" data-reveal="0.11">
+          <li><a href="https://www.behance.net/kononenkopro" rel="noopener noreferrer" target="_blank" class="link">Behance</a></li>
+          <li><a href="https://pin.it/3RdgAMy" rel="noopener noreferrer" target="_blank" class="link">Pinterest</a></li>
+          <li><a href="https://t.me/knko_clients" rel="noopener noreferrer" target="_blank" class="link">Telegram</a></li>
+          <li><a href="https://api.whatsapp.com/send/?phone=79267403370&amp;text=%D0%9F%D0%BE%D0%BB%D1%83%D1%87%D0%B8%D1%82%D1%8C+%D0%BA%D0%BE%D0%BD%D1%86%D0%B5%D0%BF%D1%86%D0%B8%D1%8E&amp;type=phone_number&amp;app_absent=0" rel="noopener noreferrer" target="_blank" class="link"> WhatsApp </a></li>
+          <li class="cfs"><a href="tel:+7 (926) 740-33-70" rel="noopener noreferrer" target="_blank" class="link">Phone</a></li>
+          <li><a href="mailto:office@knko.pro" rel="noopener noreferrer" target="_blank" class="link">Email</a></li>
+          <li><a href="https://t.me/knko_for_developers" rel="noopener noreferrer" target="_blank" class="link">Channel</a></li>
+        </ul>
+
+        <p class="rbk xbj" data-reveal="0.10">Address</p>
+        <ul class="hak jli" data-reveal="0.16">
+          <li><p>Via Giacomo Leopardi 14, 20123, Milano <br> Italia</p></li>
+          <li class="cfs"><p>Keizersgracht 421, 1016, Amsterdam <br> Netherlands</p></li>
+        </ul>
+
+        <p class="rbk rbv" data-reveal="0.15">Hours</p>
+        <ul class="hak spz" data-reveal="0.21">
+          <li><p>Mon to Fri</p></li>
+          <li><p class="cl-gr3">10:00 AM</p></li>
+          <li><p class="cl-gr3">7:00 PM</p></li>
+          <li class="cfs"><p>Sat to Sun </p></li>
+          <li><p class="cl-gr3">12:00 PM</p></li>
+          <li><p class="cl-gr3">5:00 PM</p></li>
+        </ul>
+      </div>
+
+      <div class="nom grd">
+        <svg class="amn" width="1860" height="556" viewBox="0 0 1860 556" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="KNKO">
+          <path d="M0 13.3658H66.6376V293.244L335.409 13.3658H410.932L202.134 230.308L428.702 542.765H350.958L159.19 274.733L66.6376 370.247V542.765H0V13.3658Z" fill="#fff"/>
+          <path d="M450.672 13.3658H532.117L796.447 447.991H797.927V13.3658H864.565V542.765H783.119L518.79 108.139H517.309V542.765H450.672V13.3658Z" fill="#fff"/>
+          <path d="M951.957 13.3658H1018.6V293.244L1287.37 13.3658H1362.89L1154.09 230.308L1380.66 542.765H1302.92L1111.15 274.733L1018.6 370.247V542.765H951.957V13.3658Z" fill="#fff"/>
+          <path d="M1601.14 553.131C1550.29 553.131 1505.13 541.284 1465.64 517.59C1426.64 493.897 1396.29 461.319 1374.57 419.855C1352.85 377.898 1341.99 330.511 1341.99 277.695C1341.99 224.879 1352.85 177.739 1374.57 136.275C1396.29 94.3182 1426.64 61.7398 1465.64 38.54C1505.13 14.8467 1550.29 3 1601.14 3C1651.98 3 1696.9 14.8467 1735.89 38.54C1775.38 61.7398 1805.99 94.3182 1827.7 136.275C1849.42 177.739 1860.28 224.879 1860.28 277.695C1860.28 330.511 1849.42 377.898 1827.7 419.855C1805.99 461.319 1775.38 493.897 1735.89 517.59C1696.9 541.284 1651.98 553.131 1601.14 553.131ZM1411.59 277.695C1411.59 317.678 1418.25 353.958 1431.58 386.536C1445.4 419.115 1466.38 445.276 1494.52 465.021C1523.15 484.272 1558.69 493.897 1601.14 493.897C1643.59 493.897 1678.88 484.272 1707.02 465.021C1735.65 445.276 1756.62 419.115 1769.95 386.536C1783.77 353.958 1790.68 317.678 1790.68 277.695C1790.68 238.206 1783.77 202.172 1769.95 169.594C1756.62 137.016 1735.65 111.101 1707.02 91.8501C1678.88 72.1057 1643.59 62.2334 1601.14 62.2334C1558.69 62.2334 1523.15 72.1057 1494.52 91.8501C1466.38 111.101 1445.4 137.016 1431.58 169.594C1418.25 202.172 1411.59 238.206 1411.59 277.695Z" fill="#fff"/>
+        </svg>
+
+        <p class="qqa" data-reveal>All rights reserved</p>
+
+        <div class="vit" data-reveal="0.05">
+          <p> License Number </p>
+          <p> IT-AR-2023-15847 </p>
+          <p> NL-BA-08576321 </p>
+        </div>
+
+        <div class="drq sio" data-reveal="0.10">
+          <p>Visual Design</p>
+          <a href="https://artemshcherban.com" rel="noopener noreferrer" target="_blank" class="link">Artem Shcherban</a>
+        </div>
+
+        <div class="drq lpl" data-reveal="0.15">
+          <p>Development</p>
+          <a href="https://reksaandhika.com" rel="noopener noreferrer" target="_blank" class="link">Reksa Andhika</a>
+        </div>
+
+        <div class="mip" data-reveal="0.20">
+          <a href="/legal" class="link">Legal documents</a>
+          <p> © 2026</p>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+<script>
+/* ════════════════════════════════════════════════════════════════════
+   2. FÁZIS — GSAP + ScrollTrigger animációk, parallax, egyedi kurzor
+   ────────────────────────────────────────────────────────────────────
+   • Minden kezdeti "rejtett" állapotot a GSAP állít be → JS nélkül,
+     illetve prefers-reduced-motion esetén az oldal teljesen statikus
+     és látható (progresszív fejlesztés).
+   • Nincs 3D / Canvas / WebGL — csak transform + opacity.
+   ════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+  var doc = document.documentElement;
+  doc.classList.add('js');
+
+  /* GSAP nélkül → marad a 1. fázisbeli statikus váz */
+  if (!window.gsap || !window.ScrollTrigger) { doc.classList.remove('js'); return; }
+  gsap.registerPlugin(ScrollTrigger);
+
+  /* reduced-motion → semmilyen animáció, semmilyen egyedi kurzor */
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    doc.classList.remove('js'); return;
+  }
+
+  /* ── Statisztika-sorok: scrollra "gyulladnak" (mint az eredetinél) ── */
+  gsap.utils.toArray('.ima .ppi .ohb').forEach(function (el) {
+    ScrollTrigger.create({
+      trigger: el,
+      start: 'top 78%', end: 'bottom 45%',
+      toggleClass: { targets: el, className: 'is-active' }
+    });
+  });
+
+  /* ── Általános fade-in-up: szövegek, footer-elemek ─────────────────── */
+  gsap.utils.toArray('[data-reveal]').forEach(function (el) {
+    gsap.from(el, {
+      y: 44, opacity: 0, duration: 1, ease: 'power3.out',
+      delay: parseFloat(el.getAttribute('data-reveal')) || 0,
+      scrollTrigger: { trigger: el, start: 'top 88%', once: true }
+    });
+  });
+
+  /* ── Brands: óriáscím belépés + buborékok orbitja (scrub) ──────────── */
+  gsap.from('.ucu', {
+    y: 90, opacity: 0, scale: .97, transformOrigin: '50% 100%',
+    duration: 1.2, ease: 'power3.out',
+    scrollTrigger: { trigger: '.uod', start: 'top 72%', once: true }
+  });
+
+  /* ── Footer: KNKO logó "feltolulása" (translateY 105% → 0) ─────────── */
+  gsap.fromTo('.amn path',
+    { yPercent: 105 },
+    { yPercent: 0, stagger: .09, duration: 1.3, ease: 'power3.out',
+      scrollTrigger: { trigger: '.nom', start: 'top 88%', once: true } });
+
+  /* ── 2b. GALÉRIA KOLLÁZS-ADATOK ──────────────────────────────────────
+   r: egyedi dőlésszög (markáns, váltakozó előjelű)
+   y: függőleges eltolás rem-ben = szórás + parabola-ív komponens
+      (a szélső képek lejjebb lógnak: ív = 2.7·(i-4.5)²)
+   s: egyedi parallax sebességtényező X irányban (1 = a sáv sebessége) */
+  var GAL = [
+    { r:  -4, y: 95, s: 0.85 },
+    { r:   3, y: 12, s: 1.15 },
+    { r:  -4, y: 76, s: 0.95 },
+    { r:   4, y:-31, s: 1.25 },
+    { r:  -3, y: 11, s: 0.90 },
+    { r:   3, y:-24, s: 1.05 },
+    { r:  -4, y: 64, s: 0.80 },
+    { r:   3, y:  6, s: 1.20 },
+    { r:  -3, y: 77, s: 0.88 },
+    { r:   4, y: 20, s: 1.10 }
+  ];
+  var galItems = gsap.utils.toArray('.gal-item');
+  function galRootFs(){ return parseFloat(getComputedStyle(document.documentElement).fontSize) || 1; }
+  /* szabálytalan kollázs — modul szinten, így matchMedia újraszámolásnál
+     is megmarad; a hover-scale a belső .gal-in rétegen fut */
+  galItems.forEach(function (el, i) {
+    gsap.set(el, { rotation: GAL[i % GAL.length].r, transformOrigin: 'center center' });
+  });
+  /* átméretezésnél a galéria-timeline érvénytelenítése:
+     a function-alapú y/x értékek a refresh-kor újraszámolódnak */
+  var galRz;
+  window.addEventListener('resize', function(){
+    clearTimeout(galRz);
+    galRz = setTimeout(function(){
+      if (window.__galTl) { window.__galTl.invalidate(); }
+      ScrollTrigger.refresh();
+    }, 150);
+  });
+
+  var mm = gsap.matchMedia();
+
+  /* ═══ VELOCITY-DIAL — közös geometria és állapot (desktop + mobil) ═══
+     Küllő = cubic Bézier (M + C…). ÁLLÓ helyzetben a két vezérlőpont
+     PONTOSAN az egyenesen ül (kolineáris a végpontokkal) → tökéletesen
+     egyenes vonal. A görbület KIZÁRÓLAG a két vezérlőpont tangenciális
+     eltolásával készül — a VÉGPONTOK rögzültek, ezért a 01–08 számok
+     (fix sugáron, --rot-tal keringve) forgás/hajlás közben is pontosan
+     a küllővégek pozícióját követik. */
+  var CX = 456.5, CY = 456.5, R0 = 100, R1 = 428;
+  function spokePt(r, compassDeg){
+    var a = compassDeg * Math.PI / 180;
+    return [ CX + r * Math.sin(a), CY - r * Math.cos(a) ];
+  }
+  function spokeD(alpha){                 /* EGYENES: vezérlők a vonalon */
+    var fr = [0, 1/3, 2/3, 1];
+    var pts = fr.map(function(f){ return spokePt(R0 + (R1 - R0) * f, alpha); });
+    return spokePath(pts);
+  }
+  function spokeBendD(alpha, bend){       /* MEGHAJLÍTOTT: vezérlők tangenciálisan */
+    /* [r-frakció, hajlítási súly] — a végpontok súlya 0 → nem mozdulnak */
+    var fr = [[0, 0], [1/3, .5], [2/3, 1], [1, 0]];
+    var a = alpha * Math.PI / 180;
+    var tx = Math.cos(a), ty = Math.sin(a);        /* tangenciális irány (CW+) */
+    var pts = fr.map(function(it){
+      var q = spokePt(R0 + (R1 - R0) * it[0], alpha);
+      return [ q[0] + tx * bend * it[1], q[1] + ty * bend * it[1] ];
+    });
+    return spokePath(pts);
+  }
+  function spokePath(pts){
+    function n(v){ return v.toFixed(2); }
+    return 'M' + n(pts[0][0]) + ' ' + n(pts[0][1]) +
+           ' C' + n(pts[1][0]) + ' ' + n(pts[1][1]) +
+           ', '  + n(pts[2][0]) + ' ' + n(pts[2][1]) +
+           ', '  + n(pts[3][0]) + ' ' + n(pts[3][1]);
+  }
+  /* Díszforgató állapot:  base = tl1 scrub (szakasz-pozíció),
+     vel  = sebesség-összegző forgás (LE: CCW, FEL: CW),
+     bend = görbület (sebességgel arányos; megállásnál elastic rugóval 0-ba) */
+  var dial = { base: 0, vel: 0, bend: 0, returning: false };
+  window.__dial = dial;   /* debug / teszt */
+
+  /* ══════════ DESKTOP ══════════ */
+  mm.add('(min-width: 768px)', function () {
+
+    /* 1. SZEKCIÓ — natív sticky "pin": a forgás + görbület most SEBESSÉG-vezérelt
+       (lásd lejjebb a VELOCITY-DIAL modult). Itt csak a kezdő egyenes d-k:
+       mindkét állapot azonos szerkezetű M + C…, a vezérlőpont-eltolás
+       folyamatos interpolációjával — MorphSVG plugin nélkül. A 01–08 számok
+       a küllővégek pozícióját követik (--rot változó, végig fektetve). */
+    var spokes = gsap.utils.toArray('.ctw svg .spoke');
+    spokes.forEach(function(p, i){ gsap.set(p, { attr: { d: spokeD(8 + i*45) } }); });
+
+    /* Az új sorok kezdőállapota GSAP-ből: a CSS %-os translate-t a böngésző
+       px-mátrixként számolja, a GSAP pedig nem tudná yPercent-ként tween-elni. */
+    gsap.set('.odo-cell.b', { yPercent: 115, rotationX: -60 });
+
+    var tl1 = gsap.timeline({
+      scrollTrigger: { trigger: '.nmc', start: 'top top', end: 'bottom bottom', scrub: true }
+    });
+    /* A forgás PROXY-ra megy (dial.base): a tényleges rotációt (--rot + qqg)
+       a velocity-ticker írja ki minden frame-ben (base + vel), így a
+       pozíció-scrub és a scroll-sebességes réteg SOHA nem ütközik. */
+    tl1.to(dial, { base: 110, ease: 'none', duration: 4.4 }, 0);
+    tl1.fromTo('.ctw .lhr span', { opacity: 0 },
+               { opacity: 1, stagger: .12, duration: .8 }, 0)
+       /* ── Odometer szövegcsere: két külön görgő, párhuzamosan.
+            Régi sor: felső zsanéron felfelé kipörög (rotateX 0→90),
+            új sor: alsó zsanérról felbeifordul (rotateX 90→0). ── */
+       .set('.odo-cell.b', { opacity: 1 }, 2.28)
+       /* régi sor: felfelé gördül KI aablakból, miközben a felső görgő körül átbillen */
+       .to('.odo-cell.a', { yPercent: -115, rotationX: 60, duration: 1.15, ease: 'power2.in', stagger: .12 }, 2.3)
+       /* új sor: alulról gördül BE, a alsó görgőről egyenesedve a helyére */
+       .to('.odo-cell.b', { yPercent: 0, rotationX: 0, duration: 1.15, ease: 'power2.out', stagger: .12 }, 2.42)
+       .set('.odo-cell.a', { opacity: 0 }, 3.5)
+       /* ── Téma-váltás: háttér fehér→fekete; a küllők, számok és a cím
+            (currentColor) inverz módon feketéből fehérbe fordulnak. ── */
+       .fromTo('.nmc',
+               { backgroundColor: '#ffffff', color: '#000000' },
+               { backgroundColor: '#000000', color: '#ffffff', duration: 1.6, ease: 'none' }, 2.6)
+       /* ── Sötét fázisban a (fehér) küllővonalak vastagabbak — fekete
+            háttéren a vékony vonalak eltűnnének. A vastagság a téma-
+            váltással SZINKRONBAN, scrub-elve változik (mindkét görgetési
+            irányban determinisztikus); világos fázisban marad a eredeti. ── */
+       .fromTo(spokes,
+               { attr: { 'stroke-width': 0.941598 } },
+               { attr: { 'stroke-width': 1.45 }, duration: 1.6, ease: 'none' }, 2.6)
+       .to({}, { duration: .3 });   /* rövid kivárás, mielőtt a pin elenged */
+
+
+
+    /* 2. SZEKCIÓ — fotógyűrű: pin + orbit-forgás + parallax drift */
+    var tl2 = gsap.timeline({
+      scrollTrigger: {
+        trigger: '.uwg', start: 'top top', end: '+=140%',
+        scrub: .6, pin: true, anticipatePin: 1
+      }
+    });
+    tl2.fromTo('.vnj', { rotate: -8 }, { rotate: 96, duration: 3, ease: 'none' }, 0);
+    gsap.utils.toArray('.vnj .elr').forEach(function (el, i) {
+      tl2.fromTo(el.querySelector('img'),
+        { yPercent: (i % 2 ? 7 : -7) },
+        { yPercent: (i % 2 ? -7 : 7), duration: 3, ease: 'none' }, 0);
+    });
+    tl2.from('.uwg .ciz .iek', { y: 30, opacity: 0, stagger: .12, duration: .6 }, 2.2);
+
+    /* 3. SZEKCIÓ — partner-buborékok lassú orbitja a cím körül (scrub) */
+    gsap.to('.mam', {
+      rotate: 90, transformOrigin: '50% 50%', ease: 'none',
+      scrollTrigger: { trigger: '.uod', start: 'top bottom', end: 'bottom top', scrub: .8 }
+    });
+    gsap.from('.mam .xuc', {
+      opacity: 0, scale: .55, stagger: .06, duration: .9, ease: 'power3.out',
+      scrollTrigger: { trigger: '.uod', start: 'top 68%', once: true }
+    });
+  });
+
+  /* ══════════ MOBIL ══════════ (nincs pin — csak belépő animációk) */
+  mm.add('(max-width: 767.98px)', function () {
+    gsap.from('.pmh .eta.lha', { y: 40, opacity: 0, duration: 1, ease: 'power3.out',
+      scrollTrigger: { trigger: '.nmc', start: 'top 70%', once: true } });
+    gsap.from('.ctw .lhr span', { opacity: 0, stagger: .06, duration: .7,
+      scrollTrigger: { trigger: '.nmc', start: 'top 60%', once: true } });
+    gsap.from('.vnj .elr', { opacity: 0, scale: .7, stagger: .05, duration: .8, ease: 'power3.out',
+      scrollTrigger: { trigger: '.uwg', start: 'top 70%', once: true } });
+    gsap.from('.uwg .ciz .iek', { y: 30, opacity: 0, stagger: .12, duration: .8, ease: 'power3.out',
+      scrollTrigger: { trigger: '.uwg', start: 'top 55%', once: true } });
+    gsap.from('.mam .xuc', { opacity: 0, scale: .6, stagger: .05, duration: .8,
+      scrollTrigger: { trigger: '.uod', start: 'top 70%', once: true } });
+    gsap.from('.gal-item', { opacity: 0, stagger: .06, duration: .8, ease: 'power3.out',
+      scrollTrigger: { trigger: '.gal', start: 'top 75%', once: true } });
+  });
+
+  /* ── 2b. GALÉRIA — SZABAD GÖRGETÉS: VONAL → KÖR (számlap) FORMÁCIÓ ──
+     NINCS pin és NINCS scroll-stop: a szekció a lap természetes
+     folyamatában áramlik, semmi nem akasztja meg a felhasználót.
+     A görgetés előrehaladását egy scrub:1-es proxy érték méri (puha,
+     tehetetlen követhetőség), és ennek arányában MINDEN kártya tisztán
+     MATEMATIKAI, determinisztikus állapotok között interpolál HÁROM
+     fázisban: BALRÓL JOBBRA VONULÁS (a sor egben, a bal szél mögül
+     csúszik be a J-ívre) → KÖZÉPRE IGAZÍTOTT VONAL → KÖR (óralap/nap)
+     a szekció közepén, egyenletes 36°-os eloszlásban. A vonulás alatt
+     minden kártya UGYANAZT a shift-et kapja (a sor együtt tart), az
+     átrendeződés kártyánként pici fáziseltolással fut — minden
+     koordináta számolt, nincs ugrálás; visszagörgetésre is pontosan
+     ugyanazok az állapotok jönnek létre (scrub determinizmus). */
+  var galBox = document.querySelector('.gal');
+  if (galBox && galItems.length) {
+
+    /* Végállapot 1 — EMELKEDŐ VONAL (100508 JÓ referencia, nulláról):
+       A sor szélessége DINAMIKUSAN ~1,3 képernyőszélességre skálázódik
+       (lineSc) → a diagonál KÉT VÉGE egyszerre látszik: bal-alsó sarok
+       (kártyaközép ~88% vh, alja természetesen levág) → szelíd emelkedés →
+       jobb-felső, a CÍM SÁVJÁBAN (~30% vh). A 161253 hibájának gyökere az
+       volt, hogy a ~1,9×W széles sorból csak a középső, közel egyforma
+       magasságú szakasz látszott → lapos csík + fekete üresség fölötte. */
+    function galLineState(i, n, W, H, wds, lsc, gTop){
+      var gap = 20, run = 0, j;
+      for (j = 0; j < n; j++) run += wds[j] * lsc;
+      var xL = (W - (run + (n - 1) * gap)) / 2;
+      for (j = 0; j < i; j++) xL += wds[j] * lsc + gap;
+      var t = n > 1 ? i / (n - 1) : 0;
+      var sN = t * t * (3 - 2 * t);                     /* smoothstep */
+      /* VIEWPORT-HORGONYT Y (az üres-sáv VÉGLEGES megoldása): a diagonál
+         cél-Y-a KÉPERNYŐ-koordináta (bal vég ~85% vh, jobb vég ~30% vh),
+         amiből a .gal aktuális topját levonjuk → a képsor a szekció
+         BEÚSZÁSA KÖZBEN IS az egész képernyőt kitölti — sosem gyűlik
+         össze az aljára, és sosem marad üres középső sáv. */
+      var cyVp = H * (0.70 - (0.70 - 0.30) * Math.pow(sN, 2));
+      return {
+        cx: xL + wds[i] * lsc / 2,
+        cy: cyVp - gTop,
+        rot: -(2 + 7.5 * Math.pow(sN, 1.6)),            /* érintő-irányú dőlés */
+        sc: lsc
+      };
+    }
+    /* Végállapot 2 — KÖR / SZÁMLAP: egyenletes 36°-os eloszlás,
+       R = min(0.375·H, 0.44·W); a skála a kör kerületéhez igazítja a
+       kártyákat (sarkuk VIII. érintkezzen, ne fedjék egymást). */
+    function galCircleState(i, n, W, H, wds){
+      var R  = Math.min(H * 0.375, W * 0.44);
+      var a  = -90 + i * (360 / n);            /* 1. kártya felül */
+      var rd = a * Math.PI / 180;
+      var wMax = Math.max.apply(null, wds);
+      return {
+        cx: W / 2 + R * Math.cos(rd),
+        cy: H * 0.5 + R * Math.sin(rd),
+        rot: (function(){ var rr = (a + 90) % 360; if (rr > 180) rr -= 360; return rr * 0.4; })(),
+                  /* érintőhöz simuló, legrövidebb irányban — sosem áll fejjel lefelé */
+        sc: Math.max(0.45, Math.min(1, (2 * Math.PI * R / n) / (wMax * 1.1)))
+      };
+    }
+
+    var galProg = { p: 0 };
+    /* HÁROMFÁZISÚ FOLYAMAT (egyetlen determinisztikus p szerint):
+       A) p 0 → 0.40   JOBBRÓL BALRA áramló beúszás (143918): a sor
+          egben tartott formációja a JOBB szél mögül csúszik be, Y-ban
+          gyakorlatilag mozdulatlanul — VÉGIG a cím alatt marad.
+       B) p 0.40 → 0.55 PLATÓ: a kompakt, középre igazított vonal
+          NYUGALMI állapotként tartósan látható (a referencia fő képe).
+       C) p 0.55 → 1   VONAL → KÖR átrendeződés, szirmos fázis-staggerrel.
+       B) p = 0.45     középre igazított vonal (a korábban jóváhagyott állapot).
+       C) p 0.45 → 1   VONAL → KÖR átrendeződés, szirmos fázis-staggerrel. */
+    var PH = 0.35;      /* beúszás vége — pici elcsúszás, gyorsan a helyén */
+    var MORPH0 = 0.72;  /* PLATÓ p 0.35–0.72: a TELJES diagonál a képernyőn
+                           (gal.top≈120px-nál, p≈0.50 körül már mind kint van) */
+    var galApply = function () {
+      var W = galBox.clientWidth, H = galBox.clientHeight;
+      var n = galItems.length;
+      var wds = galItems.map(function (c) { return c.offsetWidth; });
+      var p = galProg.p;
+      var runAll = 0, j;
+      for (j = 0; j < n; j++) runAll += wds[j];
+      /* DINAMIKUS vonal-skála: a sor mindig ~1,3 viewport-széles */
+      var lineSc = Math.max(0.55, Math.min(0.88, (W * 1.25 - (n - 1) * 18) / runAll));
+      var rowW = runAll * lineSc + (n - 1) * 18;
+      var xL0 = (W - rowW) / 2;              /* a sor bal széle, középen */
+      /* p=0 kezdő-eltolásvektor — JOBBRÓL BALRA, de csak FINOM (+0.12 W):
+         a diagonál p=0-kor is szinte teljesen látszik (csak a jobb széle
+         csúszik be) → a kompozíció EGYETLEN pillanatban sem üres —
+         a beúszás elegáns mikromozgás, nem hosszú üres várakozás */
+      var mX = 0.07 * W, mY = 0;
+      var sA = Math.min(1, Math.max(0, p / PH));
+      sA = sA * sA * (3 - 2 * sA);           /* smoothstep → vajpuha kifutás */
+      var shX = mX * (1 - sA), shY = mY * (1 - sA);
+      var gTop = galBox.getBoundingClientRect().top;  /* viewport-horgony */
+      var vh = window.innerHeight;
+      var h3b = document.querySelector('.pinwrap .enr h3').getBoundingClientRect().bottom;
+      var textRight = W * 0.50;                 /* a címsor szövegblokkjának jobb széle */
+      /* BELÉPŐ FADE: a kártyák csak akkor jelennek meg, amikor a .gal
+         ténylegesen beérkezik a viewport alsó harmadába (nem "túl hamar") */
+      var op = Math.max(0, Math.min(1, (0.86 * vh - gTop) / (0.26 * vh)));
+      galItems.forEach(function (el, i) {
+        var A = galLineState(i, n, W, H, wds, lineSc, gTop);
+        var B = galCircleState(i, n, W, H, wds);
+        var ax = A.cx + shX;                 /* beúszás: közös (dx) shift */
+        var lp = Math.min(1, Math.max(0, (p - MORPH0) / (1 - MORPH0) * 1.18 - i * 0.02));
+        lp = lp * lp * (3 - 2 * lp);         /* smoothstep + szirmos stagger */
+        var sc = A.sc + (B.sc - A.sc) * lp;
+        var fx = (ax + (B.cx - ax) * lp) - (el.offsetLeft + el.offsetWidth / 2);
+        var fy = (A.cy + shY + (B.cy - A.cy) * lp) - (el.offsetTop + el.offsetHeight / 2);
+        /* SZÖVEG-VÉDELEM: a kártya SOSEM csúszhat rá a címsorra — ha a
+           nézeti X-pozíciója a szövegsávba esik, az Y-a legalább a cím
+           alja + 36px (a cím AKTUÁLIS képernyő-pozíciójához képest,
+           ezért görgetés közben is mindig közvetlen a szöveg ALATT van) */
+        var halfW = el.offsetWidth * sc / 2;
+        var cvx = el.offsetLeft + fx + el.offsetWidth / 2;
+        if (cvx - halfW * 0.6 < textRight) {
+          var minY = h3b + 36 - gTop - el.offsetTop;
+          if (fy < minY) fy = minY;
+        }
+        gsap.set(el, {
+          x: fx, y: fy,
+          rotation: A.rot + (B.rot - A.rot) * lp,
+          scale: sc,
+          opacity: op,
+          force3D: true
+        });
+      });
+    };
+    gsap.to(galProg, {
+      p: 1, ease: 'none',
+      onUpdate: galApply,
+      scrollTrigger: {
+        trigger: galBox,
+        start: 'top 92%',      /* belépéskor indul a finom beúszás */
+        end: 'center 40%',     /* a KÖR akkor áll fel, amikor a gal-közép a
+                                  képernyő 40%-ánál van → a kész kör teljesen
+                                  látható (közép 432px, R=405 → 27–837px) */
+        scrub: 1,              /* vajpuha követhetőség — NINCS pin! */
+        invalidateOnRefresh: true
+      }
+    });
+    ScrollTrigger.addEventListener('refresh', galApply);
+    galApply();
+  }
+
+  /* ── Egyedi kurzor: dot + lemaradó kör (csak finom pointer esetén) ── */
+  var fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  if (fine) {
+    var dot = document.querySelector('.cursor-dot');
+    var ring = document.querySelector('.cursor-ring');
+    if (dot && ring) {
+      doc.classList.add('has-cursor');
+      gsap.set([dot, ring], { xPercent: -50, yPercent: -50 });
+      var qdx = gsap.quickTo(dot,  'x', { duration: .10, ease: 'power3' });
+      var qdy = gsap.quickTo(dot,  'y', { duration: .10, ease: 'power3' });
+      var qrx = gsap.quickTo(ring, 'x', { duration: .42, ease: 'power3' });
+      var qry = gsap.quickTo(ring, 'y', { duration: .42, ease: 'power3' });
+      var shown = false;
+      window.addEventListener('mousemove', function (e) {
+        if (!shown) { shown = true; gsap.to([dot, ring], { opacity: 1, duration: .3 }); }
+        qdx(e.clientX); qdy(e.clientY); qrx(e.clientX); qry(e.clientY);
+      }, { passive: true });
+      document.addEventListener('mouseleave', function () {
+        shown = false; gsap.to([dot, ring], { opacity: 0, duration: .3 });
+      });
+      document.querySelectorAll('a, button, .elr, .xuc, .ohb, .gal-item').forEach(function (t) {
+        t.addEventListener('mouseenter', function () {
+          gsap.to(ring, { scale: 1.9, duration: .35, ease: 'power3.out' });
+          gsap.to(dot,  { scale: .5,  duration: .35 });
+        });
+        t.addEventListener('mouseleave', function () {
+          gsap.to(ring, { scale: 1, duration: .35, ease: 'power3.out' });
+          gsap.to(dot,  { scale: 1, duration: .35 });
+        });
+      });
+      document.addEventListener('mousedown', function () { gsap.to(ring, { scale: .75, duration: .18 }); });
+      document.addEventListener('mouseup',   function () { gsap.to(ring, { scale: 1,   duration: .30 }); });
+    }
+  }
+
+  /* ══════════ VELOCITY-DIAL — görgetési sebességre reagáló rugalmas küllők ══════════
+     • LE gördítés  → a díszforgató az óramutató járásával ELLENTÉTES irányba
+       forog (CCW), a küllők a tehetetlenség látnak ívesen meghajlani;
+       a görbület (curve intensity) EGYENES ARÁNYOS a scroll-sebességgel,
+       az előjel adja a hajlás irányát.
+     • FEL gördítés → megegyező (CW) forgás, ellentétes hajlás.
+     • MEGÁLLÁS     → amint a sebesség 0-ra csökken, a vezérlőpontok
+       elastic.out(1, 0.3) gumirugóval pattannak vissza a tökéletesen
+       egyenes helyzetbe. A 01–08 számok végig a küllővégeket követik. */
+  (function(){
+    var spokes = Array.prototype.slice.call(document.querySelectorAll('.ctw svg .spoke'));
+    var rotG   = document.querySelector('.ctw svg .qqg');
+    var lhr    = document.querySelector('.ctw .lhr');
+    var vS = 0, lastY = null, wasMoving = false, active = false;
+
+    function apply(){
+      var total = dial.base + dial.vel;
+      if (rotG) gsap.set(rotG, { rotation: total, svgOrigin: '456.5 456.5' });
+      if (lhr)  lhr.style.setProperty('--rot', total + 'deg');
+      spokes.forEach(function(p, i){ p.setAttribute('d', spokeBendD(8 + i * 45, dial.bend)); });
+    }
+    gsap.ticker.add(function(){
+      var y = window.pageYOffset || document.documentElement.scrollTop || 0;
+      if (lastY === null){ lastY = y; return; }
+      var vRaw = y - lastY; lastY = y;
+      vS += (vRaw - vS) * .16;                       /* simított sebesség (px/frame) */
+      if (!active){ return; }
+      var moving = Math.abs(vRaw) > .5 || Math.abs(vS) > .3;
+      if (moving){
+        if (dial.returning){ gsap.killTweensOf(dial); dial.returning = false; }
+        wasMoving = true;
+        dial.vel += -vS * .05;                       /* LE: −= (CCW), FEL: += (CW) */
+        var tgt = gsap.utils.clamp(-78, 78, vS * 2.1);
+        dial.bend += (tgt - dial.bend) * .25;        /* görbület ∝ sebesség */
+      } else if (wasMoving){
+        wasMoving = false; dial.returning = true;
+        gsap.to(dial, { bend: 0, duration: 1.2, ease: 'elastic.out(1, 0.3)',
+          onComplete: function(){ dial.returning = false; } });
+      }
+      apply();
+    });
+    ScrollTrigger.create({
+      trigger: '.nmc', start: 'top bottom', end: 'bottom top',
+      onToggle: function(self){
+        active = self.isActive;
+        if (!active){ gsap.killTweensOf(dial); dial.bend = 0; dial.returning = false; }
+        apply();
+      }
+    });
+    window.addEventListener('load', apply);
+  })();
+
+  /* A létrehozási sorrend eltér a dokumentum-sorrendtől (a pin a mm-ben van,
+     a rá következő trigger-ök korábban jöttek létre), ezért a refresh-pozíciókat
+   dokumentum-sorrendbe rendezzük — különben a pin-spacer offset hiányozna. */
+  ScrollTrigger.sort();
+
+  /* Késői layout-változások (betűtípus, képek) után újramérés */
+  window.addEventListener('load', function () { ScrollTrigger.sort(); ScrollTrigger.refresh(); });
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () { ScrollTrigger.sort(); ScrollTrigger.refresh(); });
+  }
+})();
+</script>
+</body>
+</html>
